@@ -6,8 +6,7 @@ vnoremap <leader>c :<c-u>call <SID>OcamlCompile(visualmode())<cr>
 " text between this and the next set of parentheses
 nnoremap <leader>e :call <SID>CompileBetween()<cr>
 
-" send the whole file to the toplevel
-nnoremap <leader>b ggVG:<c-u>call <SID>OcamlCompile(visualmode())<cr>G
+nnoremap <leader>f ggVG:<c-u>call <SID>OcamlCompile(visualmode())<cr>G
 
 
 autocmd WinEnter * call s:CloseIfOnlyOcamlLeft()
@@ -37,8 +36,7 @@ function! s:CompileBetween()
         return
     endif
 
-    " XXX ugh why the escapes
-    execute "silent! normal! :\<c-u>call <SID>OcamlCompile(visualmode())\<cr>\<esc>/;;\<cr>  "
+    execute "silent! normal! :\<c-u>call <SID>OcamlCompile(visualmode())\<cr>/;;\<cr>  "
     let v:errmsg = prev_err
     let &wrapscan = prev_wrap
 endfunction
@@ -52,8 +50,7 @@ function! s:OpenOcaml()
         match none /\v(.\s)*/
         let s:ocaml_buffer = bufnr("%")
         sleep 100 m
-        " let's just throw escapes everywherrre
-        execute "normal! \<esc>\<C-w>p\<esc>"
+        execute "normal! \<esc>\<C-w>p"
     endif
 endfunction
 
@@ -95,8 +92,10 @@ function! s:OcamlCompile(type)
     let prev_window = winnr()
     windo execute 'if winbufnr("%") ==# ' . s:ocaml_buffer . "|execute 'normal! G'|endif"
     " why does it return in insert mode?
-    execute 'normal! ' . prev_window . "\<C-w>\<C-w>\<esc>"
+    execute 'normal! ' . prev_window . "\<C-w>\<C-w>"
 
     " restore the user's previous unnamed register
     let @@ = saved_unnamed_register
+    " whyy
+    stopinsert
 endfunction
