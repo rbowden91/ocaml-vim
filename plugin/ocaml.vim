@@ -26,18 +26,19 @@ function! s:CompileBetween()
 
     let prev_err = v:errmsg
     let v:errmsg = ""
-    execute "silent normal! ?;;\<cr>  "
+    execute "silent! normal! ?;;\<cr>  "
     if v:errmsg != ""
         execute "normal! gg"
         let v:errmsg = ""
     endif
 
-    execute "silent normal! v/;;\<cr> "
+    execute "silent! normal! v/;;\<cr> "
     if v:errmsg != ""
         return
     endif
 
-    execute "silent normal! :\<c-u>call <SID>OcamlCompile(visualmode())\<cr>/;;\<cr>  "
+    " XXX ugh why the escapes
+    execute "silent! normal! :\<c-u>call <SID>OcamlCompile(visualmode())\<cr>\<esc>/;;\<cr>  "
     let v:errmsg = prev_err
     let &wrapscan = prev_wrap
 endfunction
@@ -51,7 +52,8 @@ function! s:OpenOcaml()
         match none /\v(.\s)*/
         let s:ocaml_buffer = bufnr("%")
         sleep 100 m
-        execute "normal! \<esc>\<C-w>p"
+        " let's just throw escapes everywherrre
+        execute "normal! \<esc>\<C-w>p\<esc>"
     endif
 endfunction
 
@@ -92,7 +94,8 @@ function! s:OcamlCompile(type)
     " move any window for the ocaml toplevel buffer to the bottom
     let prev_window = winnr()
     windo execute 'if winbufnr("%") ==# ' . s:ocaml_buffer . "|execute 'normal! G'|endif"
-    execute 'normal! ' . prev_window . "\<C-w>\<C-w>"
+    " why does it return in insert mode?
+    execute 'normal! ' . prev_window . "\<C-w>\<C-w>\<esc>"
 
     " restore the user's previous unnamed register
     let @@ = saved_unnamed_register
